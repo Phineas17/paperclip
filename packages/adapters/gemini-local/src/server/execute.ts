@@ -217,6 +217,10 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
   if (!sandbox && !env.GEMINI_SANDBOX) {
     env.GEMINI_SANDBOX = "false";
   }
+  // Force HOME to /tmp on Railway/Linux environments to avoid permission issues with .gemini config
+  if (!env.HOME || env.HOME === "/root" || env.HOME === "/paperclip") {
+    env.HOME = "/tmp";
+  }
   if (!hasExplicitApiKey && authToken) {
     env.PAPERCLIP_API_KEY = authToken;
   }
