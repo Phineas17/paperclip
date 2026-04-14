@@ -214,13 +214,6 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
   for (const [key, value] of Object.entries(envConfig)) {
     if (typeof value === "string") env[key] = value;
   }
-  if (!sandbox && !env.GEMINI_SANDBOX) {
-    env.GEMINI_SANDBOX = "false";
-  }
-  // Force HOME to /tmp on Railway/Linux environments to avoid permission issues with .gemini config
-  if (!env.HOME || env.HOME === "/root" || env.HOME === "/paperclip") {
-    env.HOME = "/tmp";
-  }
   if (!hasExplicitApiKey && authToken) {
     env.PAPERCLIP_API_KEY = authToken;
   }
@@ -231,6 +224,13 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
   );
   const billingType = resolveGeminiBillingType(effectiveEnv);
   const runtimeEnv = ensurePathInEnv(effectiveEnv);
+  if (!sandbox) {
+    delete runtimeEnv.GEMINI_SANDBOX;
+    runtimeEnv.GEMINI_SANDBOX = "false";
+    env.GEMINI_SANDBOX = "false";
+  }
+  runtimeEnv.HOME = "/tmp";
+  env.HOME = "/tmp";
   await ensureCommandResolvable(command, cwd, runtimeEnv);
   const resolvedCommand = await resolveCommandForLogs(command, cwd, runtimeEnv);
   const loggedEnv = buildInvocationEnvForLogs(env, {
