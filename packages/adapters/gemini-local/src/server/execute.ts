@@ -214,6 +214,9 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
   for (const [key, value] of Object.entries(envConfig)) {
     if (typeof value === "string") env[key] = value;
   }
+  if (!sandbox && !env.GEMINI_SANDBOX) {
+    env.GEMINI_SANDBOX = "false";
+  }
   if (!hasExplicitApiKey && authToken) {
     env.PAPERCLIP_API_KEY = authToken;
   }
